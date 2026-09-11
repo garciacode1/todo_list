@@ -25,22 +25,33 @@ class _TodoHomePageState extends State<TodoHomePage> {
   final List<Todo> todos = <Todo>[
     Todo(
       name: 'Doing laundry',
-      description: 'put all the dirty clothes inside the washng machine',
+      description: 'Put all the dirty clothes inside the washing machine',
     ),
     Todo(
       name: 'Gym time',
-      description: 'complete the workout session of the day',
+      description: 'Complete the workout session of the day',
     ),
     Todo(
       name: 'Cutting the grass',
-      description: 'I plan to cut my gardens grass completely. ',
+      description: 'I plan to cut my garden grass completely',
     ),
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Todo List')),
-      body: const Center(child: Text('Todo App')),
+      body: Center(
+        child: ListView.builder(
+          itemCount: todos.length,
+          itemBuilder: (BuildContext context, int i) {
+            return Container(
+              padding: const EdgeInsets.all(5),
+              child: Text(todos[i].toString()),
+            );
+          },
+        ),
+      ),
     );
   }
 }
