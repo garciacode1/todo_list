@@ -46,7 +46,14 @@ class _TodoHomePageState extends State<TodoHomePage> {
           itemCount: todos.length,
           itemBuilder: (BuildContext context, int i) {
             return Container(
-              padding: const EdgeInsets.all(5),
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.lightBlue,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [BoxShadow(blurRadius: 4)],
+              ),
+
               child: Text(todos[i].toString()),
             );
           },
