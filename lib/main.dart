@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_list/models/todo.dart';
+import 'package:todo_list/models/todo_list.dart';
+import 'package:todo_list/views/todo_widget.dart';
 
 void main() {
-  runApp(const TodoApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => TodoList(),
+      child: const TodoApp(),
+    ),
+  );
 }
 
 class TodoApp extends StatelessWidget {
@@ -10,7 +18,11 @@ class TodoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(title: 'Todo List', home: TodoHomePage());
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Todo List',
+      home: TodoHomePage(),
+    );
   }
 }
 
@@ -22,23 +34,9 @@ class TodoHomePage extends StatefulWidget {
 }
 
 class _TodoHomePageState extends State<TodoHomePage> {
-  final List<Todo> todos = <Todo>[
-    Todo(
-      name: 'Doing laundry',
-      description: 'Put all the dirty clothes inside the washing machine',
-    ),
-    Todo(
-      name: 'Gym time',
-      description: 'Complete the workout session of the day',
-    ),
-    Todo(
-      name: 'Cutting the grass',
-      description: 'I plan to cut my garden grass completely',
-    ),
-  ];
-
   final TextEditingController _controlName = TextEditingController();
   final TextEditingController _controlDescription = TextEditingController();
+
   void _openAddTodo() {
     showDialog(
       context: context,
@@ -71,14 +69,15 @@ class _TodoHomePageState extends State<TodoHomePage> {
               ElevatedButton(
                 child: const Text('Submit'),
                 onPressed: () {
-                  setState(() {
-                    todos.add(
-                      Todo(
-                        name: _controlName.text,
-                        description: _controlDescription.text,
-                      ),
-                    );
-                  });
+                  Provider.of<TodoList>(context, listen: false).add(
+                    Todo(
+                      name: _controlName.text,
+                      description: _controlDescription.text,
+                    ),
+                  );
+
+                  _controlName.clear();
+                  _controlDescription.clear();
 
                   Navigator.pop(context);
                 },
@@ -93,25 +92,33 @@ class _TodoHomePageState extends State<TodoHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Todo List')),
-      body: Center(
-        child: ListView.builder(
-          itemCount: todos.length,
-          itemBuilder: (BuildContext context, int i) {
-            return Container(
-              margin: const EdgeInsets.all(8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.lightBlue,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [BoxShadow(blurRadius: 4)],
-              ),
-
-              child: Text(todos[i].toString()),
-            );
-          },
-        ),
+      appBar: AppBar(
+        title: const Text('Todo List'),
+        actions: [
+          Consumer<TodoList>(
+            builder: (context, model, child) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Text('Incomplete: ${model.incompleteCount}'),
+                ),
+              );
+            },
+          ),
+        ],
       ),
+
+      body: Consumer<TodoList>(
+        builder: (context, model, child) {
+          return ListView.builder(
+            itemCount: model.todoCount,
+            itemBuilder: (BuildContext context, int i) {
+              return TodoWidget(todo: model.todos[i]);
+            },
+          );
+        },
+      ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddTodo,
         tooltip: 'Add Todo',
