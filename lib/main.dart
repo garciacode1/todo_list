@@ -37,6 +37,59 @@ class _TodoHomePageState extends State<TodoHomePage> {
     ),
   ];
 
+  final TextEditingController _controlName = TextEditingController();
+  final TextEditingController _controlDescription = TextEditingController();
+  void _openAddTodo() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add Todo'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(5, 8, 5, 0),
+                child: Text('Name'),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 5, 8),
+                child: TextFormField(controller: _controlName),
+              ),
+
+              const Padding(
+                padding: EdgeInsets.fromLTRB(5, 8, 5, 0),
+                child: Text('Description'),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 5, 8),
+                child: TextFormField(controller: _controlDescription),
+              ),
+
+              ElevatedButton(
+                child: const Text('Submit'),
+                onPressed: () {
+                  setState(() {
+                    todos.add(
+                      Todo(
+                        name: _controlName.text,
+                        description: _controlDescription.text,
+                      ),
+                    );
+                  });
+
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +111,11 @@ class _TodoHomePageState extends State<TodoHomePage> {
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openAddTodo,
+        tooltip: 'Add Todo',
+        child: const Icon(Icons.add),
       ),
     );
   }
