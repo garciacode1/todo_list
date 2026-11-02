@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_list/models/todo.dart';
 import 'package:todo_list/models/todo_list.dart';
+import 'package:todo_list/services/i_data_source.dart';
+import 'package:todo_list/services/sqlite_data_source.dart';
 import 'package:todo_list/views/todo_widget.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Get.putAsync<IDataSource>(
+    () async => await SQLiteDataSource.createAsync(),
+  );
+
   runApp(
     ChangeNotifierProvider(
-      create: (context) => TodoList(),
+      create: (context) {
+        final todoList = TodoList();
+
+        todoList.refresh();
+
+        return todoList;
+      },
       child: const TodoApp(),
     ),
   );
@@ -68,8 +83,8 @@ class _TodoHomePageState extends State<TodoHomePage> {
 
               ElevatedButton(
                 child: const Text('Submit'),
-                onPressed: () {
-                  Provider.of<TodoList>(context, listen: false).add(
+                onPressed: () async {
+                  await Provider.of<TodoList>(context, listen: false).add(
                     Todo(
                       name: _controlName.text,
                       description: _controlDescription.text,
@@ -79,6 +94,10 @@ class _TodoHomePageState extends State<TodoHomePage> {
                   _controlName.clear();
                   _controlDescription.clear();
 
+                  if (!context.mounted) {
+                    return;
+                  }
+
                   Navigator.pop(context);
                 },
               ),
@@ -87,6 +106,14 @@ class _TodoHomePageState extends State<TodoHomePage> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _controlName.dispose();
+    _controlDescription.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -110,11 +137,14 @@ class _TodoHomePageState extends State<TodoHomePage> {
 
       body: Consumer<TodoList>(
         builder: (context, model, child) {
-          return ListView.builder(
-            itemCount: model.todoCount,
-            itemBuilder: (BuildContext context, int i) {
-              return TodoWidget(todo: model.todos[i]);
-            },
+          return RefreshIndicator(
+            onRefresh: model.refresh,
+            child: ListView.builder(
+              itemCount: model.todoCount,
+              itemBuilder: (BuildContext context, int i) {
+                return TodoWidget(todo: model.todos[i]);
+              },
+            ),
           );
         },
       ),

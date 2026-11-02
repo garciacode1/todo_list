@@ -17,8 +17,8 @@ class _TodoWidgetState extends State<TodoWidget> {
   Widget build(BuildContext context) {
     return Dismissible(
       key: GlobalKey(),
-      onDismissed: (direction) {
-        Provider.of<TodoList>(context, listen: false).delete(widget.todo);
+      onDismissed: (direction) async {
+        await Provider.of<TodoList>(context, listen: false).delete(widget.todo);
       },
 
       child: Container(
@@ -36,13 +36,11 @@ class _TodoWidgetState extends State<TodoWidget> {
 
             Checkbox(
               value: widget.todo.complete,
-              onChanged: (bool? value) {
-                setState(() {
-                  Provider.of<TodoList>(
-                    context,
-                    listen: false,
-                  ).updateTodo(widget.todo, value ?? false);
-                });
+              onChanged: (bool? value) async {
+                await Provider.of<TodoList>(
+                  context,
+                  listen: false,
+                ).updateTodo(widget.todo, value ?? false);
               },
             ),
           ],

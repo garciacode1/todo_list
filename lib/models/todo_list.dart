@@ -1,7 +1,9 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:todo_list/models/todo.dart';
+import 'package:todo_list/services/i_data_source.dart';
 
 class TodoList extends ChangeNotifier {
   final List<Todo> _todos = [];
@@ -9,12 +11,27 @@ class TodoList extends ChangeNotifier {
   UnmodifiableListView<Todo> get todos => UnmodifiableListView(_todos);
 
   int get todoCount => _todos.length;
+
   int get incompleteCount =>
       _todos.where((todo) => todo.complete == false).length;
 
-  void add(Todo todo) {
-    _todos.add(todo);
+  Future<List<Todo>> refresh() async {
+    IDataSource dataSource = Get.find<IDataSource>();
+
+    _todos.clear();
+    _todos.addAll(await dataSource.browse());
+
     notifyListeners();
+
+    return _todos;
+  }
+
+  Future<void> add(Todo todo) async {
+    IDataSource dataSource = Get.find<IDataSource>();
+
+    await dataSource.add(todo);
+
+    await refresh();
   }
 
   void removeAll() {
@@ -22,20 +39,26 @@ class TodoList extends ChangeNotifier {
     notifyListeners();
   }
 
-  void delete(Todo todo) {
-    _todos.remove(todo);
-    notifyListeners();
+  Future<void> delete(Todo todo) async {
+    IDataSource dataSource = Get.find<IDataSource>();
+
+    await dataSource.delete(todo);
+
+    await refresh();
   }
 
-  void updateTodo(Todo todo, bool complete) {
-    final int index = _todos.indexOf(todo);
+  Future<void> updateTodo(Todo todo, bool complete) async {
+    IDataSource dataSource = Get.find<IDataSource>();
 
-    _todos[index] = Todo(
+    Todo updatedTodo = Todo(
+      id: todo.id,
       name: todo.name,
       description: todo.description,
       complete: complete,
     );
 
-    notifyListeners();
+    await dataSource.edit(updatedTodo);
+
+    await refresh();
   }
 }
