@@ -1,7 +1,17 @@
+import 'package:hive/hive.dart';
+
+@HiveType(typeId: 0)
 class Todo {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String name;
+
+  @HiveField(2)
   final String description;
+
+  @HiveField(3)
   final bool complete;
 
   Todo({
@@ -42,5 +52,28 @@ class Todo {
   @override
   String toString() {
     return '$name - $description';
+  }
+}
+
+class TodoAdapter extends TypeAdapter<Todo> {
+  @override
+  int get typeId => 0;
+
+  @override
+  Todo read(BinaryReader reader) {
+    return Todo(
+      id: reader.read(),
+      name: reader.read(),
+      description: reader.read(),
+      complete: reader.read(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Todo obj) {
+    writer.write(obj.id);
+    writer.write(obj.name);
+    writer.write(obj.description);
+    writer.write(obj.complete);
   }
 }

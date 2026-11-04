@@ -4,14 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:todo_list/models/todo.dart';
 import 'package:todo_list/models/todo_list.dart';
 import 'package:todo_list/services/i_data_source.dart';
-import 'package:todo_list/services/sqlite_data_source.dart';
+import 'package:todo_list/services/hive_data_source.dart';
 import 'package:todo_list/views/todo_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Get.putAsync<IDataSource>(
-    () async => await SQLiteDataSource.createAsync(),
+    () async => await HiveDataSource.createAsync(),
   );
 
   runApp(
